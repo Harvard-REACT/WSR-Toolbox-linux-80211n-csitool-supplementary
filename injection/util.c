@@ -18,11 +18,23 @@ static inline uint32_t advance_lfsr(uint32_t lfsr)
 				(lfsr >> 24)) & 1);
 }
 
-void generate_payloads(uint8_t *buffer, size_t buffer_size)
+void generate_payloads_29(uint8_t *buffer, size_t buffer_size)
 {
 	uint32_t lfsr = 0x1f3d5b79;
 	uint32_t i;
+	unsigned long n = 1;
 	for (i = 0; i < buffer_size; ++i) {
+		if(i%29 == 0)
+			buffer[i] = (n >> 24) & 0xFF;
+		else if(i%29 == 1)
+                        buffer[i] = (n >> 16) & 0xFF;
+		else if(i%29 == 2)
+                        buffer[i] = (n >> 8) & 0xFF;
+		else if(i%29 == 3 ){
+                        buffer[i] = n & 0xFF;
+			n = n+1;
+		}
+		else{
 		lfsr = advance_lfsr(lfsr);
 		lfsr = advance_lfsr(lfsr);
 		lfsr = advance_lfsr(lfsr);
@@ -31,8 +43,81 @@ void generate_payloads(uint8_t *buffer, size_t buffer_size)
 		lfsr = advance_lfsr(lfsr);
 		lfsr = advance_lfsr(lfsr);
 		lfsr = advance_lfsr(lfsr);
-		buffer[i] = lfsr & 0xff;
+		buffer[i] = lfsr & 0xff;}
 	}
+	
+}
+void generate_payloads_31(uint8_t *buffer, size_t buffer_size)
+{
+        uint32_t lfsr = 0x1f3d5b79;
+        uint32_t i;
+        unsigned long n = 1;
+        for (i = 0; i < buffer_size; ++i) {
+                if(i%31 == 0)
+                        buffer[i] = (n >> 24) & 0xFF;
+                else if(i%31 == 1)
+                        buffer[i] = (n >> 16) & 0xFF;
+                else if(i%31 == 2)
+                        buffer[i] = (n >> 8) & 0xFF;
+                else if(i%31 == 3 ){
+                        buffer[i] = n & 0xFF;
+                        n = n+1;
+                }
+                else{
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                buffer[i] = lfsr & 0xff;}
+        }
+        
+}
+void generate_payloads_33(uint8_t *buffer, size_t buffer_size)
+{
+        uint32_t lfsr = 0x1f3d5b79;
+        uint32_t i;
+        unsigned long n = 1;
+        for (i = 0; i < buffer_size; ++i) {
+                if(i%33 == 0)
+                        buffer[i] = (n >> 24) & 0xFF;
+                else if(i%33 == 1)
+                        buffer[i] = (n >> 16) & 0xFF;
+                else if(i%33 == 2)
+                        buffer[i] = (n >> 8) & 0xFF;
+                else if(i%33 == 3 ){
+                        buffer[i] = n & 0xFF;
+                        n = n+1;
+                }
+                else{
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                lfsr = advance_lfsr(lfsr);
+                buffer[i] = lfsr & 0xff;}
+        }
+
+}
+
+
+void generate_payloads_count(uint8_t *buffer, size_t buffer_size)
+{
+        uint32_t lfsr = 0x1f3db79;
+	unsigned long n = 1;
+        uint32_t i;
+        for (i = 0; i < buffer_size; i+=4) {
+                buffer[i] = (n >> 24) & 0xFF;
+		buffer[i+1] = (n >> 16) & 0xFF;
+		buffer[i+2] = (n >> 8) & 0xFF;
+		buffer[i+3] =n & 0xFF;
+        }
 }
 
 int get_mac_address(uint8_t *buf, const char *ifname)

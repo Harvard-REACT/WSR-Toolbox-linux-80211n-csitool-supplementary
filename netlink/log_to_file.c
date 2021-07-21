@@ -13,7 +13,7 @@
 #include <linux/netlink.h>
 
 #define MAX_PAYLOAD 2048
-#define SLOW_MSG_CNT 1
+#define SLOW_MSG_CNT 10
 
 int sock_fd = -1;							// the socket
 FILE* out = NULL;
@@ -89,8 +89,8 @@ int main(int argc, char** argv)
 		l2 = htons(l);
 		fwrite(&l2, 1, sizeof(unsigned short), out);
 		ret = fwrite(cmsg->data, 1, l, out);
-		if (count % 100 == 0)
-			printf("wrote %d bytes [msgcnt=%u]\n", ret, count);
+		//if (count % 100 == 0)
+		//	printf("wrote %d bytes [msgcnt=%u]\n", ret, count);
 		++count;
 		if (ret != l)
 			exit_program_err(1, "fwrite");
