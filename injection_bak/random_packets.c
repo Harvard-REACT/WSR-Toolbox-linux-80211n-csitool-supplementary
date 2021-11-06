@@ -29,9 +29,11 @@ struct tx80211	tx;
 struct tx80211_packet	tx_packet;
 struct tx80211_packet	tx_packet_31;
 struct tx80211_packet	tx_packet_33;
+struct tx80211_packet	tx_packet_35;
 uint8_t *payload_buffer_29;
 uint8_t *payload_buffer_31;
 uint8_t *payload_buffer_33;
+uint8_t *payload_buffer_35;
 
 #define PAYLOAD_SIZE	2000000
 
@@ -65,6 +67,16 @@ static inline void payload_memcpy_33(uint8_t *dest, uint32_t length,
         }
         //printf("\n");
 }
+static inline void payload_memcpy_35(uint8_t *dest, uint32_t length,
+                uint32_t offset)
+{
+        uint32_t i;
+        for (i = 0; i < length; ++i) {
+                dest[i] = payload_buffer_35[(offset + i) % PAYLOAD_SIZE];
+                //printf("%zu  ",dest[i]);
+        }
+        //printf("\n");
+}
 
 
 
@@ -75,6 +87,7 @@ int main(int argc, char** argv)
 	struct lorcon_packet *packet;
 	struct lorcon_packet *packet_31;
 	struct lorcon_packet *packet_33;
+	struct lorcon_packet *packet_35;
 	uint32_t i;
 	int32_t ret;
 	uint32_t mode;
@@ -107,14 +120,15 @@ int main(int argc, char** argv)
 	payload_buffer_29 = malloc(PAYLOAD_SIZE);
 	payload_buffer_31 = malloc(PAYLOAD_SIZE);
 	payload_buffer_33 = malloc(PAYLOAD_SIZE);
-	if (payload_buffer_29 == NULL) {
+	payload_buffer_35 = malloc(PAYLOAD_SIZE);
+	if (payload_buffer_29 == NULL||payload_buffer_31 == NULL||payload_buffer_33 == NULL||payload_buffer_35 == NULL) {
 		perror("malloc payload buffer");
 		exit(1);
 	}
-	generate_payloads_29(payload_buffer_29, PAYLOAD_SIZE);
-	generate_payloads_31(payload_buffer_31, PAYLOAD_SIZE);
-	generate_payloads_33(payload_buffer_33, PAYLOAD_SIZE);
-
+	generate_payloads_timeframe(payload_buffer_29, PAYLOAD_SIZE,packet_size);
+	generate_payloads_timeframe(payload_buffer_31, PAYLOAD_SIZE,packet_size+2);
+	generate_payloads_timeframe(payload_buffer_33, PAYLOAD_SIZE,packet_size+4);
+	generate_payloads_timeframe(payload_buffer_35, PAYLOAD_SIZE,packet_size+6);
 	/* Setup the interface for lorcon */
 	printf("Initializing LORCON\n");
 	init_lorcon();
@@ -123,6 +137,7 @@ int main(int argc, char** argv)
 	packet = malloc(sizeof(*packet) + packet_size);
 	packet_31 = malloc(sizeof(*packet) + packet_size+2);
 	packet_33 = malloc(sizeof(*packet) + packet_size+4);
+	packet_35 = malloc(sizeof(*packet) + packet_size+6);
 	if (!packet) {
 		perror("malloc packet");
 		exit(1);
@@ -133,10 +148,13 @@ int main(int argc, char** argv)
 				| (0x0 << 8) /* Not To-DS */);
 	packet_33->fc = (0x08 /* Data frame */
                                 | (0x0 << 8) /* Not To-DS */);
+	packet_35->fc = (0x08 /* Data frame */
+                                | (0x0 << 8) /* Not To-DS */);
 
 	packet->dur = 0xffff;
 	packet_31->dur = 0xffff;
 	packet_33->dur = 0xffff;
+	packet_35->dur = 0xffff;
 	if (mode == 0) {
 		memcpy(packet->addr1, "\x00\x16\xea\x12\x34\x56", 6);
 		get_mac_address(packet->addr2, "mon0");
@@ -145,24 +163,30 @@ int main(int argc, char** argv)
 		memcpy(packet->addr1, "\x00\x16\xea\x12\x34\x56", 6);
 		memcpy(packet_31->addr1, "\x00\x16\xea\x12\x34\x56", 6);
 		memcpy(packet_33->addr1, "\x00\x16\xea\x12\x34\x56", 6);
+		memcpy(packet_35->addr1, "\x00\x16\xea\x12\x34\x56", 6);
 		memcpy(packet->addr2, "\x00\x16\xea\x12\x34\x56", 6);
 		memcpy(packet_31->addr2, "\x00\x16\xea\x12\x34\x56", 6);
 		memcpy(packet_33->addr2, "\x00\x16\xea\x12\x34\x56", 6);
+		memcpy(packet_35->addr2, "\x00\x16\xea\x12\x34\x56", 6);
 //		memcpy(packet->addr3, "\xff\xff\xff\xff\xff\xff", 6);
 		get_mac_address(packet->addr3, "mon0");
 		get_mac_address(packet_31->addr3, "mon0");
 		get_mac_address(packet_33->addr3, "mon0");
+		get_mac_address(packet_35->addr3, "mon0");
 	}
 	packet->seq = 0;
 	packet_31->seq = 0;
 	packet_33->seq = 0;
+	packet_35->seq = 0;
 	tx_packet.packet = (uint8_t *)packet;
 	tx_packet_31.packet = (uint8_t *)packet_31;
 	tx_packet_33.packet = (uint8_t *)packet_33;
+	tx_packet_35.packet = (uint8_t *)packet_35;
 	tx_packet.plen = sizeof(*packet) + packet_size;
 	tx_packet_31.plen = sizeof(*packet_31) + packet_size+2;
 	tx_packet_33.plen = sizeof(*packet_33) + packet_size+4;
-	int num_robot = 3;
+	tx_packet_35.plen = sizeof(*packet_35) + packet_size+6;
+	int num_robot = 4;
 	/* Send packets */
 	printf("Sending %u packets of size %u (. every thousand)\n", num_packets, packet_size);
 	if (delay_us) {
@@ -177,6 +201,8 @@ int main(int argc, char** argv)
                                 (i*(packet_size+2)) % PAYLOAD_SIZE);
 		payload_memcpy_33(packet_33->payload, packet_size+4,
                                 (i*(packet_size+4)) % PAYLOAD_SIZE);
+		payload_memcpy_35(packet_35->payload, packet_size+6,
+                                (i*(packet_size+6)) % PAYLOAD_SIZE);
 
 		if (delay_us) {
 			clock_gettime(CLOCK_MONOTONIC, &now);
@@ -200,7 +226,7 @@ int main(int argc, char** argv)
                         if (diff > 0 && diff < (delay_us/num_robot))
                                 usleep(delay_us/num_robot-diff);
                 }
-                ret = tx80211_txpacket(&tx, &tx_packet_31);
+                //ret = tx80211_txpacket(&tx, &tx_packet_31);
 		//printf("Sent second\n");
 
 		clock_gettime(CLOCK_MONOTONIC, &before);
@@ -212,7 +238,19 @@ int main(int argc, char** argv)
                         if (diff > 0 && diff < (delay_us/num_robot))
                                 usleep(delay_us/num_robot-diff);
                 }
-                ret = tx80211_txpacket(&tx, &tx_packet_33);
+               // ret = tx80211_txpacket(&tx, &tx_packet_33);
+               // printf("Sent third\n");
+		
+		clock_gettime(CLOCK_MONOTONIC, &before);
+		if (delay_us) {
+                        clock_gettime(CLOCK_MONOTONIC, &now);
+                        diff = (now.tv_sec - before.tv_sec) * 1000000 +
+                               (now.tv_nsec - before.tv_nsec + 500) / 1000;
+                      //  diff = delay_us*(i+1) - diff;
+                        if (diff > 0 && diff < (delay_us/num_robot))
+                                usleep(delay_us/num_robot-diff);
+                }
+                //ret = tx80211_txpacket(&tx, &tx_packet_35);
                // printf("Sent third\n");
 
 		if (ret < 0) {

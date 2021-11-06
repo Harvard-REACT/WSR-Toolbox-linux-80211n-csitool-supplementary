@@ -6,7 +6,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-
+void generate_payloads_timeframe(uint8_t *buffer, size_t buffer_size,size_t special_length);
 void generate_payloads_29(uint8_t *buffer, size_t buffer_size);
 void generate_payloads_31(uint8_t *buffer, size_t buffer_size);
 void generate_payloads_33(uint8_t *buffer, size_t buffer_size);

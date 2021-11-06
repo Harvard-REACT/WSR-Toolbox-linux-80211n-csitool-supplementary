@@ -17,6 +17,35 @@ static inline uint32_t advance_lfsr(uint32_t lfsr)
 	return (lfsr << 1) | (((lfsr >> 31) ^ (lfsr >> 29) ^ (lfsr >> 25) ^
 				(lfsr >> 24)) & 1);
 }
+void generate_payloads_timeframe(uint8_t *buffer, size_t buffer_size,size_t special_length)
+{
+	uint32_t lfsr = 0x1f3d5b79;
+	uint32_t i;
+	unsigned long n = 1;
+	for (i = 0; i < buffer_size; ++i) {
+		if(i%special_length == 0)
+			buffer[i] = (n >> 24) & 0xFF;
+		else if(i%special_length == 1)
+                        buffer[i] = (n >> 16) & 0xFF;
+		else if(i%special_length == 2)
+                        buffer[i] = (n >> 8) & 0xFF;
+		else if(i%special_length == 3 ){
+                        buffer[i] = n & 0xFF;
+			n = n+1;
+		}
+		else{
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		lfsr = advance_lfsr(lfsr);
+		buffer[i] = lfsr & 0xff;}
+	}
+	
+}
 
 void generate_payloads_29(uint8_t *buffer, size_t buffer_size)
 {
