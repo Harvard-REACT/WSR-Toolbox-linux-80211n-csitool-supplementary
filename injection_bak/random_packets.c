@@ -200,8 +200,8 @@ int main(int argc, char** argv)
                                 (i*packet_size) % PAYLOAD_SIZE);
 		payload_memcpy_31(packet_31->payload, packet_size+2,
                                 (i*(packet_size+2)) % PAYLOAD_SIZE);
-		payload_memcpy_33(packet_33->payload, packet_size+4,
-                                (i*(packet_size+4)) % PAYLOAD_SIZE);
+		payload_memcpy_35(packet_35->payload, packet_size+6,
+                                (i*(packet_size+6)) % PAYLOAD_SIZE);
 
                 if (delay_us) {
                         clock_gettime(CLOCK_MONOTONIC, &now);
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
         	else if(k == 2)
 		    ret = tx80211_txpacket(&tx, &tx_packet_31); //send packet 31        
 		else if(k==3)
-		    ret = tx80211_txpacket(&tx, &tx_packet_33); //send packet 35
+		    ret = tx80211_txpacket(&tx, &tx_packet_35); //send packet 35
 
 		if (ret < 0) {
                         fprintf(stderr, "Unable to transmit packet: %s\n",

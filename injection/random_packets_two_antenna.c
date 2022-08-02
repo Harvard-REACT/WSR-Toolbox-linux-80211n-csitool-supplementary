@@ -71,13 +71,14 @@ int main(int argc, char** argv)
 		printf("Usage: random_packets <number> <length> <mode: 0=my MAC, 1=injection MAC> <delay in us>\n");
 		return 1;
 	}
-	//Subtract 28 from the packet length to maintain consistency during loading the driver on TX and using random packets on RX
-	if (argc < 3 || (1 != sscanf(argv[2]-28, "%u", &packet_size)))
+	if (argc < 3 || (1 != sscanf(argv[2], "%u", &packet_size)))
 		packet_size = 2200;
 	if (argc < 2 || (1 != sscanf(argv[1], "%u", &num_packets)))
 		num_packets = 10000;
 
 	/* Generate packet payloads */
+        //Subtract 28 from the packet length to maintain consistency during loading the driver on TX and using random packets on RX
+	packet_size = packet_size-28;
 	printf("Generating packet payloads \n");
 	payload_buffer_29 = malloc(PAYLOAD_SIZE);
 	if (payload_buffer_29 == NULL) {

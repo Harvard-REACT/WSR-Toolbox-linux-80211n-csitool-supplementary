@@ -80,7 +80,8 @@ int main(int argc, char** argv)
 		perror("malloc payload buffer");
 		exit(1);
 	}
-	generate_payloads(payload_buffer, PAYLOAD_SIZE);
+	//generate_payloads(payload_buffer, PAYLOAD_SIZE);
+	generate_payloads_timeframe(payload_buffer, PAYLOAD_SIZE,packet_size);
 
 	/* Setup the interface for lorcon */
 	printf("Initializing LORCON\n");

@@ -110,11 +110,13 @@ int main(int argc, char** argv)
 		printf("Usage: random_packets <number> <length> <mode: 0=my MAC, 1=injection MAC> <delay in us>\n");
 		return 1;
 	}
-        //Subtract 28 from the packet size so that the packet number is consitent for loading the driver and when broadcasting the packets
-	if (argc < 3 || (1 != sscanf(argv[2]-28, "%u", &packet_size)))
+	if (argc < 3 || (1 != sscanf(argv[2], "%u", &packet_size)))
 		packet_size = 2200;
 	if (argc < 2 || (1 != sscanf(argv[1], "%u", &num_packets)))
 		num_packets = 10000;
+
+        //Subtract 28 from the packet size so that the packet number is consitent for loading the driver and when broadcasting the packets
+	packet_size = packet_size - 28;
 
 	/* Generate packet payloads */
 	printf("Generating packet payloads \n");
